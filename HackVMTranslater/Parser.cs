@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HackVMTranslater
 {
-    class Parser
+    public class Parser
     {
         StreamReader fileInput;
         string nextLine;
@@ -132,7 +132,7 @@ namespace HackVMTranslater
         private static bool IsArithmeticCommand(string command)
         {
             return command.Equals("add") || command.Equals("sub") || command.Equals("gt") || command.Equals("lt") || command.Equals("and") 
-                || command.Equals("or") || command.Equals("or") || command.Equals("not") || command.Equals("eq");
+                || command.Equals("or") || command.Equals("neg") || command.Equals("not") || command.Equals("eq");
         }
         /// <summary>
         /// Returns the first argument of the current command
@@ -141,17 +141,28 @@ namespace HackVMTranslater
         /// <returns></returns>
         public string Arg1()
         {
-            throw new NotImplementedException();
+           if(IsArithmeticCommand(command))
+            {
+                return command;
+            }
+            else
+            {
+                return command.Split(' ')[1];
+            }
+          
         }
 
         /// <summary>
         /// Returns the second argument of the command
         /// </summary>
         /// <returns>
+        /// intiget value 
         /// </returns>
-        public string Arg2()
+        public int Arg2()
         {
-            throw new NotImplementedException();
+            int arg2 = -1;
+            arg2 = Convert.ToInt32(command.Split(' ')[2]);
+            return arg2;
         }
 
     }
