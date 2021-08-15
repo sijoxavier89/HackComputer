@@ -21,7 +21,9 @@ namespace JackCompiler
             string outFile = file.Split('.')[0];
 
             JackTokenizer tokenizer;
+            CompilationEngine compiler;
             StreamReader streamReader;
+            StreamReader streamInput; // test compiler
             string filepath;
 
             if (file.EndsWith(".jack")) // file
@@ -30,14 +32,17 @@ namespace JackCompiler
 
                 
                 filepath = file;
-                streamReader = new StreamReader(filepath);
-
+                streamReader = new StreamReader(filepath);              
                 tokenizer = new JackTokenizer(streamReader);
 
-
+                // compiler
+                streamInput = new StreamReader(filepath);
+                string outputFIle = file.Split('.')[0] + ".xml";
+                compiler = new CompilationEngine(streamInput, outputFIle);
+                compiler.CompileClass();
                 // process file line by line
-                string outputFIle = outFile + "T.xml";
-                WriteXML(outputFIle, tokenizer);
+                string outputTokenFIle = outFile + "T.xml";
+                WriteXML(outputTokenFIle, tokenizer);
             }
             else // directory
             {
@@ -48,12 +53,25 @@ namespace JackCompiler
 
                 foreach (var item in files)
                 {
+                    Console.WriteLine(item);
+
                     string fileItem = Path.GetFileName(item);
+
+                    Console.WriteLine(fileItem);
+                    streamInput = new StreamReader(item);
+
+                    // compiler
+                    string outputFIle = item.Split('.')[0]+".xml";
+                    compiler = new CompilationEngine(streamInput, outputFIle);
+                    compiler.CompileClass();
+
+                    // Token -- will be removed
+                    string outputTokenFIle = fileItem.Split('.')[0] + "T.xml";
+                    // process file line by line
+
                     streamReader = new StreamReader(item);
                     tokenizer = new JackTokenizer(streamReader);
-                    string outputFIle = fileItem.Split('.')[0] + "T.xml";
-                    // process file line by line
-                    WriteXML(outputFIle, tokenizer);
+                    WriteXML(outputTokenFIle, tokenizer);
                 }
 
             }
