@@ -38,8 +38,8 @@ namespace JackCompiler
                 // compiler
                 streamInput = new StreamReader(filepath);
                 string outputFIle = file.Split('.')[0] + ".xml";
-                compiler = new CompilationEngine(streamInput, outputFIle);
-                compiler.CompileClass();
+              //  compiler = new CompilationEngine(streamInput, outputFIle);
+               // compiler.CompileClass();
                 // process file line by line
                 string outputTokenFIle = outFile + "T.xml";
                 WriteXML(outputTokenFIle, tokenizer);
@@ -53,11 +53,8 @@ namespace JackCompiler
 
                 foreach (var item in files)
                 {
-                    Console.WriteLine(item);
 
                     string fileItem = Path.GetFileName(item);
-
-                    Console.WriteLine(fileItem);
                     streamInput = new StreamReader(item);
 
                     // compiler

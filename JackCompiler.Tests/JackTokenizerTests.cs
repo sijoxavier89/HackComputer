@@ -19,5 +19,19 @@ namespace JackCompiler.Tests
              StreamReader streamReader = new StreamReader(filepath);
             tokenizer = new JackTokenizer(streamReader);
         }
+
+        [Fact]
+        public void TokenizeArray()
+        {
+            string filepath = @"C:\Users\sijox\source\repos\JackCompiler.Tests\Main.jack";
+            StreamReader streamReader = new StreamReader(filepath);
+            tokenizer = new JackTokenizer(streamReader);
+
+            while(tokenizer.HasMoreTokens())
+            {
+                tokenizer.Advance();
+                tokenizer.TokenType();
+            }
+        }
     }
 }

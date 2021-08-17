@@ -42,7 +42,7 @@ namespace JackCompiler
         /// <returns></returns>
         private bool IsCommand(string line)
         {
-            if (line != "" && !line.StartsWith("//") && !line.StartsWith("/*"))
+            if (line != "" && !line.StartsWith("//") && !line.StartsWith("/*") && !line.StartsWith("*"))
             {
                 return true;
             }
@@ -60,8 +60,19 @@ namespace JackCompiler
                 // split by space then
                 // again split by symbols
                 // add entries and symbols into the queue
-               var splitByBlank = command.Split(' ');
+                string[] splitByBlank;
+                if (!command.Contains("\""))
+                {
+                     splitByBlank = command.Split(' ');
+                }
+                else
+                {
+                   
+                    splitByBlank = SplitStringConstant(command);
 
+                }
+
+              
                 foreach(var word in splitByBlank)
                 {
                     
@@ -77,6 +88,34 @@ namespace JackCompiler
 
             }
         }
+
+        private static string[] SplitStringConstant(string command)
+        {
+            var regex = new Regex("\"(.*?)\"");
+            var test = regex.Split(command);
+            var match = regex.Match(command).Value;
+            var matchValue = match.Trim(new char[] { '\"' });
+            var list = new List<string>();
+
+            foreach (string s in test)
+            {
+                if (!s.Equals(matchValue))
+                {
+                    var split = s.Split(' ');
+                    foreach (var sp in split)
+                    {
+                        list.Add(sp);
+                    }
+                }
+                else
+                {
+                    list.Add(match);
+                }
+            }
+
+            return list.ToArray();
+        }
+
         public bool HasMoreTokens()
         {
             return queue.Count > 0;
@@ -137,7 +176,7 @@ namespace JackCompiler
         /// <returns></returns>
         public string StringVal()
         {
-            return currentToken;
+            return currentToken.Trim(new char[] { '\"'});
         }
     }
 }

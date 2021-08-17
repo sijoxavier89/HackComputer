@@ -12,14 +12,18 @@
     <symbol>(</symbol>
     <symbol>)</symbol>
     <symbol>{</symbol>
-    <identifier>var</identifier>
+    <keyword>var</keyword>
     <identifier>SquareGame</identifier>
     <identifier>game</identifier>
     <symbol>;</symbol>
     <keyword>let</keyword>
     <identifier>game</identifier>
     <symbol>=</symbol>
-    <identifier>game</identifier>
+    <identifier>SquareGame</identifier>
+    <symbol>.</symbol>
+    <identifier>new</identifier>
+    <symbol>(</symbol>
+    <symbol>)</symbol>
     <symbol>;</symbol>
     <keyword>do</keyword>
     <identifier>game</identifier>
@@ -44,18 +48,76 @@
     <symbol>(</symbol>
     <symbol>)</symbol>
     <symbol>{</symbol>
-    <identifier>var</identifier>
-    <keyword>boolean</keyword>
-    <identifier>b</identifier>
+    <keyword>var</keyword>
+    <keyword>int</keyword>
+    <identifier>i</identifier>
+    <symbol>,</symbol>
+    <identifier>j</identifier>
+    <symbol>;</symbol>
+    <keyword>var</keyword>
+    <identifier>String</identifier>
+    <identifier>s</identifier>
+    <symbol>;</symbol>
+    <keyword>var</keyword>
+    <identifier>Array</identifier>
+    <identifier>a</identifier>
     <symbol>;</symbol>
     <keyword>if</keyword>
     <symbol>(</symbol>
-    <identifier>b</identifier>
+    <keyword>false</keyword>
     <symbol>)</symbol>
     <symbol>{</symbol>
+    <keyword>let</keyword>
+    <identifier>s</identifier>
+    <symbol>=</symbol>
+    <stringConstant>string constant</stringConstant>
+    <symbol>;</symbol>
+    <keyword>let</keyword>
+    <identifier>s</identifier>
+    <symbol>=</symbol>
+    <keyword>null</keyword>
+    <symbol>;</symbol>
+    <keyword>let</keyword>
+    <identifier>a</identifier>
+    <symbol>[</symbol>
+    <integerConstant>1</integerConstant>
+    <symbol>]</symbol>
+    <symbol>=</symbol>
+    <identifier>a</identifier>
+    <symbol>[</symbol>
+    <integerConstant>2</integerConstant>
+    <symbol>]</symbol>
+    <symbol>;</symbol>
     <symbol>}</symbol>
     <keyword>else</keyword>
     <symbol>{</symbol>
+    <keyword>let</keyword>
+    <identifier>i</identifier>
+    <symbol>=</symbol>
+    <identifier>i</identifier>
+    <symbol>*</symbol>
+    <symbol>(</symbol>
+    <symbol>-</symbol>
+    <identifier>j</identifier>
+    <symbol>)</symbol>
+    <symbol>;</symbol>
+    <keyword>let</keyword>
+    <identifier>j</identifier>
+    <symbol>=</symbol>
+    <identifier>j</identifier>
+    <symbol>/</symbol>
+    <symbol>(</symbol>
+    <symbol>-</symbol>
+    <integerConstant>2</integerConstant>
+    <symbol>)</symbol>
+    <symbol>;</symbol>
+    <keyword>let</keyword>
+    <identifier>i</identifier>
+    <symbol>=</symbol>
+    <identifier>i</identifier>
+    <symbol>|</symbol>
+    <identifier>j</identifier>
+    <symbol>;</symbol>
     <symbol>}</symbol>
     <keyword>return</keyword>
     <symbol>;</symbol>

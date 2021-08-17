@@ -13,7 +13,7 @@ namespace JackCompiler.Tests
         [Fact]
         public void CompileClass_Success()
         {
-            string filepath = @"C:\Users\sijox\source\repos\JackCompiler.Tests\Square.jack";
+            string filepath = @"C:\Users\sijox\source\repos\JackCompiler.Tests\Square1.jack";
             StreamReader streamReader = new StreamReader(filepath);
             CompilationEngine engine = new CompilationEngine(streamReader, "test");
 
@@ -25,6 +25,17 @@ namespace JackCompiler.Tests
         public void CompileClass_classVarDec_Success()
         {
             string filepath = @"C:\Users\sijox\source\repos\JackCompiler.Tests\VarTest.jack";
+            StreamReader streamReader = new StreamReader(filepath);
+            CompilationEngine engine = new CompilationEngine(streamReader, "test");
+
+            // Act
+            engine.CompileClass();
+        }
+
+        [Fact]
+        public void CompileClass_ArrayMain()
+        {
+            string filepath = @"C:\Users\sijox\source\repos\JackCompiler.Tests\Main.jack";
             StreamReader streamReader = new StreamReader(filepath);
             CompilationEngine engine = new CompilationEngine(streamReader, "test");
 

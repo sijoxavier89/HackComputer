@@ -15,7 +15,9 @@ namespace JackCompiler
         private const string KEYWORD = "KEYWORD";
         private const string SYMBOL = "SYMBOL";
         private const string INT = "INT_CONSTANT";
-        private const string STRING = "STRING_CONST";
+        private const string INTCONST = "integerConstant";
+        private const string STRING = "STRING_CONSTANT";
+        private const string STRINGCONST = "stringConstant";
         private const string IDENTIFIER = "IDENTIFIER";
 
 
@@ -285,20 +287,19 @@ namespace JackCompiler
 
             // can be either "," or ":"
             tokenizer.Advance();
-            var symbol = tokenizer.Symbol().ToString().ToLower();
+            while (string.Equals(tokenizer.TokenType(), SYMBOL) && tokenizer.Symbol().Equals(','))
+            {
+                writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
 
-            if(symbol.Equals(","))
-            {
-                writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
-                // call reccursively for the next variable declaration
                 tokenizer.Advance();
-                CompileVarDec();
-               
+                writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier());
+
+                tokenizer.Advance();
             }
-            else // ";"
-            {
-                writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
-            }
+
+            // ";"
+            writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
+           
 
             writer.CloseElement();
 
@@ -360,22 +361,34 @@ namespace JackCompiler
             writer.AddStartElement("letStatement");
             writer.AddElement(KEYWORD.ToLower(), tokenizer.KeyWord().ToLower());
 
-            tokenizer.Advance();
-            writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier());
 
             tokenizer.Advance();
+            var token = tokenizer.Identifier();
+            tokenizer.Advance();
+            if (IsArrayEntry())
+            {
+                writer.AddElement(IDENTIFIER.ToLower(), token);
+                ArrayEntryExpression();
+                tokenizer.Advance();
+            }
+            else
+            {
+                writer.AddElement(IDENTIFIER.ToLower(), token);
+                
+            }
+
+            // =
+           
             writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
 
             // expression
             tokenizer.Advance();
-            writer.AddStartElement("expression");
-            writer.AddStartElement("term");
-            writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier());
-            writer.CloseElement();
-            writer.CloseElement();
+           
+            WriteExpression(); // new
 
-            tokenizer.Advance();
+            // ;
             writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
+         
 
             writer.CloseElement();
         }
@@ -460,15 +473,10 @@ namespace JackCompiler
             writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
 
             tokenizer.Advance();
-            writer.AddStartElement("expression");
-            writer.AddStartElement("term");
-          
-            writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier());
-            writer.CloseElement();
-            writer.CloseElement();
+            WriteExpression();
 
             // )
-            tokenizer.Advance();
+           // tokenizer.Advance();
             writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
 
             // {
@@ -494,8 +502,12 @@ namespace JackCompiler
             writer.AddStartElement("doStatement");
             // do
             writer.AddElement(KEYWORD.ToLower(), tokenizer.KeyWord().ToLower());
-
+            
             SubroutineCall();
+
+            // ;
+            tokenizer.Advance();
+            writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
 
             writer.CloseElement();
         }
@@ -519,11 +531,18 @@ namespace JackCompiler
 
             tokenizer.Advance();
             writer.AddStartElement("expressionList");
-            if (!tokenizer.TokenType().Equals(SYMBOL))
+            if (!tokenizer.Symbol().Equals(')'))
             {              
 
                 WriteExpression();
-              
+                while(tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals(","))
+                {
+                    writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+
+                    tokenizer.Advance();
+                    WriteExpression();
+                }
+
             }
             else
             {
@@ -533,39 +552,185 @@ namespace JackCompiler
 
             //)
             writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
-            // ;
-            tokenizer.Advance();
-            writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
+           
         }
 
         private void WriteExpression()
         {
             writer.AddStartElement("expression");
-            writer.AddStartElement("term");
+          
+            CompileTerm();
+            // recursive call
+           
+            while (IsOperationSymbol())
+            {
+                writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
 
+                tokenizer.Advance();
+                CompileTerm();
+            }
+
+            writer.CloseElement();
+            //  writer.CloseElement();
+
+           // tokenizer.Advance();
+
+            return;
+
+        }
+
+        private void CompileTerm()
+        {
+            writer.AddStartElement("term");
+            // when current token is an identifier (varName)
+            // it can be variable name , an array, subroutine call
             if (tokenizer.TokenType().Equals(IDENTIFIER))
             {
-                writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier());
+                var token = tokenizer.Identifier();
+                tokenizer.Advance();
+                if (IssubroutineCall())
+                {
+                    writer.AddElement(IDENTIFIER.ToLower(), token);
+                    SubroutineCallExpression();
+
+                    tokenizer.Advance();
+                  //  writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
+                }
+                else if (IsArrayEntry())
+                {
+                    writer.AddElement(IDENTIFIER.ToLower(), token);
+                    ArrayEntryExpression();
+                    tokenizer.Advance();
+                }
+                else
+                {
+                    writer.AddElement(IDENTIFIER.ToLower(), token);
+                }
             }
-            else if(tokenizer.TokenType().Equals(KEYWORD))
+            else if(IsUnaryOp())
+            {
+                writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+
+                tokenizer.Advance();
+                CompileTerm();
+            }
+            else if(tokenizer.TokenType().Equals(INT))
+            {
+                writer.AddElement(INTCONST, Convert.ToString(tokenizer.IntVal()));
+                tokenizer.Advance();
+            }
+            else if(tokenizer.TokenType().Equals(STRING))
+            {
+                writer.AddElement(STRINGCONST, tokenizer.StringVal());
+                tokenizer.Advance();
+            }
+            else if (tokenizer.TokenType().Equals(KEYWORD)) // true|false|this|null
             {
                 writer.AddElement(KEYWORD.ToLower(), tokenizer.KeyWord().ToLower());
+                tokenizer.Advance();
             }
-
-            writer.CloseElement();
-            writer.CloseElement();
-
-            tokenizer.Advance();
-            if(tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals(","))
+            else if(tokenizer.TokenType().Equals(SYMBOL) && (tokenizer.Symbol().Equals('('))) // term expression eg; (a & (b|c))
             {
                 writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
 
                 tokenizer.Advance();
                 WriteExpression();
+
+               // tokenizer.Advance();
+
+                writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+
+                tokenizer.Advance();
             }
 
-            return;
+            writer.CloseElement();
 
+            
+            // tokenizer.Advance();
+            return;
+        }
+
+        private void SubroutineCallExpression()
+        {
+            if (tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals("."))
+            {
+                writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+                tokenizer.Advance();
+                writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier());
+                tokenizer.Advance();
+            }
+
+            // (
+            writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+
+            tokenizer.Advance();
+            writer.AddStartElement("expressionList");
+            if (!tokenizer.Symbol().Equals(')')) // if next token is not closing bracket
+            {
+
+                // WriteExpression();
+                WriteExpression();
+                while (tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals(","))
+                {
+                    writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+
+                    tokenizer.Advance();
+                    WriteExpression();
+                }
+
+            }
+            else
+            {
+                writer.WriteRaw(Environment.NewLine);
+            }
+            writer.CloseElement();
+
+            //)
+            writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+        }
+
+        private void ArrayEntryExpression()
+        {
+            writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+
+            tokenizer.Advance();
+            WriteExpression();
+
+           // tokenizer.Advance();
+            writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+        }
+        private bool IsArrayEntry()
+        {
+            if (tokenizer.TokenType().Equals(SYMBOL))
+            {
+                return tokenizer.Symbol().Equals('[');
+            }
+
+            return false;
+        }
+
+        
+        private bool IssubroutineCall()
+        {
+            
+           if(tokenizer.TokenType().Equals(SYMBOL))
+            {
+                return tokenizer.Symbol().Equals('.');
+            }
+
+           return false;
+        }
+
+        private bool IsOperationSymbol()
+        {
+            return tokenizer.TokenType().Equals(SYMBOL) &&  (tokenizer.Symbol().Equals('-') || tokenizer.Symbol().Equals('+') || tokenizer.Symbol().Equals('/') || tokenizer.Symbol().Equals('&') ||
+                 tokenizer.Symbol().Equals('|') || tokenizer.Symbol().Equals('<') || tokenizer.Symbol().Equals('>') || tokenizer.Symbol().Equals('=') || tokenizer.Symbol().Equals('*'));
+        }
+       
+       
+        private bool IsUnaryOp()
+        {
+            return tokenizer.Symbol().Equals('-') || tokenizer.Symbol().Equals('~');
         }
         public void CompileReturn()
         {

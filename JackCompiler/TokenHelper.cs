@@ -11,7 +11,7 @@ namespace JackCompiler
         private const string KEYWORD = "KEYWORD";
         private const string SYMBOL = "SYMBOL";
         private const string INT = "INT_CONSTANT";
-        private const string STRING = "STRING_CONST";
+        private const string STRING = "STRING_CONSTANT";
         private const string IDENTIFIER = "IDENTIFIER";
 
         private static HashSet<char> Symbols = new HashSet<char>()
@@ -22,7 +22,7 @@ namespace JackCompiler
 
         private static HashSet<string> KeyWords = new HashSet<string>()
         {
-            "class", "constructor", "function","method", "field", "static", "int", "char", "boolean",
+            "class", "constructor", "function","method", "field", "static", "var", "int", "char", "boolean",
             "void", "true", "false", "null", "this", "let", "do", "if", "else", "while", "return"
         };
 
@@ -49,7 +49,7 @@ namespace JackCompiler
 
         private static bool IsStringConstant(string token)
         {
-            return token.StartsWith('"');
+            return token.StartsWith('\"');
         }
 
         private static bool IsIntiger(string token)
