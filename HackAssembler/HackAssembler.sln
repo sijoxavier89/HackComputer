@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JackCompiler", "..\JackComp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JackCompiler.Tests", "..\JackCompiler.Tests\JackCompiler.Tests.csproj", "{6C96BBD4-01E8-4472-90F9-3E57116E2121}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JackCompilerFinal", "..\JackCompilerFinal\JackCompilerFinal.csproj", "{2B196A28-A762-4192-8C81-5CCBB18E3C6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JackCompilerFinal", "..\JackCompilerFinal\JackCompilerFinal.csproj", "{2B196A28-A762-4192-8C81-5CCBB18E3C6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JackCompilerFinal.Tests", "..\JackCompilerFinal.Tests\JackCompilerFinal.Tests.csproj", "{19E5625D-CFEF-4071-AD60-3268748D1D4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{2B196A28-A762-4192-8C81-5CCBB18E3C6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B196A28-A762-4192-8C81-5CCBB18E3C6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B196A28-A762-4192-8C81-5CCBB18E3C6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19E5625D-CFEF-4071-AD60-3268748D1D4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19E5625D-CFEF-4071-AD60-3268748D1D4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19E5625D-CFEF-4071-AD60-3268748D1D4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19E5625D-CFEF-4071-AD60-3268748D1D4D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
