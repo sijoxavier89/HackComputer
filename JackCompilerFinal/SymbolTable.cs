@@ -191,6 +191,7 @@ namespace JackCompilerFinal
         FIELD,
         ARG,
         VAR,
-        NONE
+        NONE,
+        CONSTANT
     }
 }

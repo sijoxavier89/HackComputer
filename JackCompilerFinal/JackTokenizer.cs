@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
-namespace JackCompiler
+namespace JackCompilerFinal
 {
     public class JackTokenizer
     {
@@ -52,7 +52,7 @@ namespace JackCompiler
         /// </summary>
         private void EvaluateCommands()
         {
-            foreach(var command in commands)
+            foreach (var command in commands)
             {
                 // split by space then
                 // again split by symbols
@@ -60,24 +60,24 @@ namespace JackCompiler
                 string[] splitByBlank;
                 if (!command.Contains("\""))
                 {
-                     splitByBlank = command.Split(' ');
+                    splitByBlank = command.Split(' ');
                 }
                 else
                 {
-                   
+
                     splitByBlank = SplitStringConstant(command);
 
                 }
 
-              
-                foreach(var word in splitByBlank)
+
+                foreach (var word in splitByBlank)
                 {
-                    
+
                     string[] parts = Regex.Split(word, @"([{}()[\].,;+\-*/&|<>=~])");
-                    foreach(var part in parts)
+                    foreach (var part in parts)
                     {
-                        if(!string.IsNullOrEmpty(part))
-                        queue.Enqueue(part);
+                        if (!string.IsNullOrEmpty(part))
+                            queue.Enqueue(part);
                     }
 
 
@@ -163,7 +163,7 @@ namespace JackCompiler
         /// <returns></returns>
         public int IntVal()
         {
-             return Convert.ToInt16(currentToken);
+            return Convert.ToInt16(currentToken);
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace JackCompiler
         /// <returns></returns>
         public string StringVal()
         {
-            return currentToken.Trim(new char[] { '\"'});
+            return currentToken.Trim(new char[] { '\"' });
         }
     }
 }
