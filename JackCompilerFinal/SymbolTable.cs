@@ -122,7 +122,7 @@ namespace JackCompilerFinal
             else
             {
                 classST.TryGetValue(name, out var classEntry);
-                kind = classEntry.Kind;
+                kind = (classEntry != null)?classEntry.Kind: Kind.NONE;
             }
 
             return kind;

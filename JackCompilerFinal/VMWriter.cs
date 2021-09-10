@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -35,6 +36,7 @@ namespace JackCompilerFinal
         StreamWriter writer;
         public VMWriter(string outputFile)
         {
+            Console.WriteLine("new writer created");
             writer = new StreamWriter(outputFile);
 
 
@@ -160,7 +162,7 @@ namespace JackCompilerFinal
         //write
         private  void WriteFile(string code)
         {
-           
+          
                 writer.WriteLine(code);           
         }
 
@@ -169,6 +171,7 @@ namespace JackCompilerFinal
         /// </summary>
         public void Close()
         {
+            Console.WriteLine("writer closed");
             writer.Dispose();
         }
     }

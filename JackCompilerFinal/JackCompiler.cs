@@ -10,7 +10,7 @@ namespace JackCompilerFinal
             Console.WriteLine("Compiler started");
 
             string file = args[0];
-          
+
             CompilationEngine compiler;
             StreamReader streamInput; // test compiler
             string filepath;
@@ -23,7 +23,7 @@ namespace JackCompilerFinal
                 filepath = file;
                 // compiler
                 streamInput = new StreamReader(filepath);
-                string outputFIle = file.Split('.')[0] + ".xml";
+                string outputFIle = file.Split('.')[0] + ".vm";
                 compiler = new CompilationEngine(streamInput, outputFIle);
                 compiler.CompileClass();
 
@@ -42,7 +42,7 @@ namespace JackCompilerFinal
                     streamInput = new StreamReader(item);
 
                     // compiler
-                    string outputFIle = item.Split('.')[0] + ".xml";
+                    string outputFIle = item.Split('.')[0] + ".vm";
                     compiler = new CompilationEngine(streamInput, outputFIle);
                     compiler.CompileClass();
 
@@ -53,5 +53,5 @@ namespace JackCompilerFinal
             Console.WriteLine("Compilation completed");
         }
     }
-    
+
 }

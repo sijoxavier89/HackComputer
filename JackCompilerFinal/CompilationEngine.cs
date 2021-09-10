@@ -115,7 +115,7 @@ namespace JackCompilerFinal
             //  writer.CloseElement();     // </class>
 
             // close the file
-            // writer.Close();
+            vmWriter.Close();
         }
 
         public void CompileClassVarDec()
@@ -623,7 +623,7 @@ namespace JackCompilerFinal
             // do
             // writer.AddElement(KEYWORD.ToLower(), tokenizer.KeyWord().ToLower());
 
-            tokenizer.Advance();                                             // moved from method
+           // tokenizer.Advance();                                             // moved from method
                                                                              // writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier()); // moved from method
             SubroutineCall();
 
@@ -639,7 +639,7 @@ namespace JackCompilerFinal
         private void SubroutineCall()
         {
 
-
+            tokenizer.Advance();
             var subName = tokenizer.Identifier();
             int nArgs = 0; // number of arguments pushed to stack before calling the method
             tokenizer.Advance();
@@ -717,12 +717,12 @@ namespace JackCompilerFinal
             while (IsOperationSymbol())
             {
                 //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
-
+                var op = tokenizer.Symbol();
                 tokenizer.Advance();
                 CompileTerm();
 
                 // add operation vm command
-                vmWriter.WriteArithmetic(operation[tokenizer.Symbol()]);
+                vmWriter.WriteArithmetic(operation[op]);
             }
 
             //  writer.CloseElement();
@@ -746,8 +746,8 @@ namespace JackCompilerFinal
                 if (IssubroutineCall())
                 {
                     // writer.AddElement(IDENTIFIER.ToLower(), token);
-                    //SubroutineCallExpression();
-                    SubroutineCall();
+                    SubroutineCallExpression();
+                   // SubroutineCall();
 
                     tokenizer.Advance();
                     //  writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
@@ -862,7 +862,7 @@ namespace JackCompilerFinal
         {
             var subName = tokenizer.Identifier();
             int nArgs = 0; // number of arguments pushed to stack before calling the method
-            tokenizer.Advance();
+            // tokenizer.Advance();
             if (tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals("."))
             {
                 // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
