@@ -221,6 +221,7 @@ namespace JackCompilerFinal
 
             // define new subroutine scope
             symbolTable.StartSubroutine();
+            if(!string.Equals(token, "function"))  // function does not need this as it is static 
             AddToSymbolTable("this", classname, Kind.ARG);
 
             // Params
@@ -684,10 +685,12 @@ namespace JackCompilerFinal
                 CompileTerm();
 
                 // add operation vm command
-                if (!op.Equals('/'))
-                    vmWriter.WriteArithmetic(operation[op]);
-                else
+                if (op.Equals('/'))
                     vmWriter.WriteCall("Math.divide", 2);
+                else if(op.Equals('*'))
+                    vmWriter.WriteCall("Math.multiply", 2);
+                else
+                vmWriter.WriteArithmetic(operation[op]);
             }
 
             //  writer.CloseElement();
@@ -749,12 +752,19 @@ namespace JackCompilerFinal
             else if (IsUnaryOp())
             {
                 //  writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
-
+                var op = tokenizer.Symbol();
                 tokenizer.Advance();
                 CompileTerm();
 
                 // write arithmetic and logic command
-                vmWriter.WriteArithmetic(operation[tokenizer.Symbol()]);
+                if (op.Equals('-') || op.Equals('~'))
+                {
+                    vmWriter.WriteArithmetic(Command.NOT);
+                }
+                else
+                {
+                    vmWriter.WriteArithmetic(operation[op]);
+                }
             }
             else if (tokenizer.TokenType().Equals(INT))
             {
@@ -833,8 +843,8 @@ namespace JackCompilerFinal
             }
             else if (keyword.Equals("true"))
             {
-                vmWriter.WritePush(Segment.CONST, 1);
-                vmWriter.WriteArithmetic(Command.NEG);
+                vmWriter.WritePush(Segment.CONST, 0);
+                vmWriter.WriteArithmetic(Command.NOT);
             }
         }
         private void SubroutineCallExpression(string subname = "")
