@@ -147,7 +147,7 @@ namespace JackCompilerFinal
             else
             {
                 classST.TryGetValue(name, out var classEntry);
-                type = classEntry.Type;
+                type = (classEntry != null)? classEntry.Type: string.Empty;
             }
 
             return type;

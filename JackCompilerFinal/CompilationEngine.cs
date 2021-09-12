@@ -22,7 +22,7 @@ namespace JackCompilerFinal
         private int labelIfCount;
         private int labelWhileCount;
 
-
+        private bool isVoid = false;
         private static Dictionary<string, Kind> kindLookup = new Dictionary<string, Kind>()
         {
             {"static",Kind.STATIC },
@@ -176,6 +176,7 @@ namespace JackCompilerFinal
 
         public void CompileSubroutineDec()
         {
+            isVoid = false;
             string token = tokenizer.KeyWord().ToLower();
             if (!(string.Equals(token, "constructor") || string.Equals(token, "function") || string.Equals(token, "method")))
             {
@@ -196,6 +197,7 @@ namespace JackCompilerFinal
             else if (tokenizer.TokenType().Equals(KEYWORD, StringComparison.OrdinalIgnoreCase))
             {
                 //writer.AddElement(KEYWORD.ToLower(), tokenizer.KeyWord().ToLower());
+                isVoid = tokenizer.KeyWord().ToLower().Equals("void");
             }
 
             // method  name
@@ -450,32 +452,49 @@ namespace JackCompilerFinal
             if (IsArrayEntry())
             {
                 // writer.AddElement(IDENTIFIER.ToLower(), token);
+                var arr = token;
+                var arrkind = symbolTable.KindOf(arr);
+                var arrindex = symbolTable.IndexOf(arr);
+                vmWriter.WritePush(kindToSegment[arrkind], arrindex);
                 ArrayEntryExpression();
+
+                vmWriter.WriteArithmetic(Command.ADD);
                 tokenizer.Advance();
+
+                // =
+                tokenizer.Advance();
+
+                WriteExpression(); // new
+
+                vmWriter.WritePop(Segment.TEMP, 0);
+                vmWriter.WritePop(Segment.POINTER, 1);
+                vmWriter.WritePush(Segment.TEMP, 0);
+                vmWriter.WritePop(Segment.THAT, 0);
             }
             else
             {
                 // writer.AddElement(IDENTIFIER.ToLower(), token);
                 lhs = token;
+                // =
+
+                //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
+
+                // expression
+                tokenizer.Advance();
+
+                WriteExpression(); // new
+
+                // ;
+                // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
+
+                // pop the value to the lhs
+                var kind = symbolTable.KindOf(lhs);
+                var index = symbolTable.IndexOf(lhs);
+
+                vmWriter.WritePop(kindToSegment[kind], index);
             }
 
-            // =
-
-            //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
-
-            // expression
-            tokenizer.Advance();
-
-            WriteExpression(); // new
-
-            // ;
-            // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
-
-            // pop the value to the lhs
-            var kind = symbolTable.KindOf(lhs);
-            var index = symbolTable.IndexOf(lhs);
-
-            vmWriter.WritePop(kindToSegment[kind], index);
+           
 
             // writer.CloseElement();
         }
@@ -629,6 +648,9 @@ namespace JackCompilerFinal
 
             // ;
             tokenizer.Advance();
+
+            // dump void value
+            vmWriter.WritePop(Segment.TEMP, 0);
             //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
 
             // writer.CloseElement();
@@ -643,67 +665,7 @@ namespace JackCompilerFinal
             var subName = tokenizer.Identifier();
             int nArgs = 0; // number of arguments pushed to stack before calling the method
             tokenizer.Advance();
-            if (tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals("."))
-            {
-                // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
-                tokenizer.Advance();
-                // writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier());
-
-                // set method name for call
-                // check the meethod is instance method or function 
-                var type = symbolTable.TypeOf(subName);
-                var method = tokenizer.Identifier();
-
-                if (!String.IsNullOrEmpty(type))
-                {
-                    subName = type + "." + method;
-                    nArgs++;
-                }
-                else
-                {
-                    subName = subName + "." + method;
-                }
-
-                tokenizer.Advance();
-            }
-            else
-            {
-                subName = classname + subName;
-            }
-
-            // (
-            // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
-
-            tokenizer.Advance();
-            // writer.AddStartElement("expressionList");
-            if (!tokenizer.Symbol().Equals(')'))
-            {
-
-                WriteExpression();
-                nArgs++; // increment arg count for each expression in the expression list
-                while (tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals(","))
-                {
-                    // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
-
-                    tokenizer.Advance();
-                    WriteExpression();
-
-                    nArgs++;
-                }
-
-            }
-            else
-            {
-                // writer.WriteRaw(Environment.NewLine);
-            }
-            //writer.CloseElement();
-
-            //)
-            //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
-
-            // call method
-
-            vmWriter.WriteCall(subName, nArgs);
+            ProcessSubroutineCall(subName, nArgs);
 
         }
 
@@ -722,7 +684,10 @@ namespace JackCompilerFinal
                 CompileTerm();
 
                 // add operation vm command
-                vmWriter.WriteArithmetic(operation[op]);
+                if (!op.Equals('/'))
+                    vmWriter.WriteArithmetic(operation[op]);
+                else
+                    vmWriter.WriteCall("Math.divide", 2);
             }
 
             //  writer.CloseElement();
@@ -746,7 +711,7 @@ namespace JackCompilerFinal
                 if (IssubroutineCall())
                 {
                     // writer.AddElement(IDENTIFIER.ToLower(), token);
-                    SubroutineCallExpression();
+                    SubroutineCallExpression(token);
                    // SubroutineCall();
 
                     tokenizer.Advance();
@@ -755,7 +720,21 @@ namespace JackCompilerFinal
                 else if (IsArrayEntry())
                 {
                     // writer.AddElement(IDENTIFIER.ToLower(), token);
-                    ArrayEntryExpression();
+                  
+                    // ArrayEntryExpression();
+                    tokenizer.Advance();
+                    WriteExpression();
+                    // push base address of the array
+                    var kind = symbolTable.KindOf(token);
+                    var index = symbolTable.IndexOf(token);
+                    vmWriter.WritePush(kindToSegment[kind], index);
+                    // add base + index
+                    vmWriter.WriteArithmetic(Command.ADD);
+                    // set the value to THAT
+                    vmWriter.WritePop(Segment.POINTER, 1);
+                    // push the value to stack
+                    vmWriter.WritePush(Segment.THAT, 0);
+
                     tokenizer.Advance();
                 }
                 else
@@ -858,48 +837,78 @@ namespace JackCompilerFinal
                 vmWriter.WriteArithmetic(Command.NEG);
             }
         }
-        private void SubroutineCallExpression()
+        private void SubroutineCallExpression(string subname = "")
         {
-            var subName = tokenizer.Identifier();
+            var subName = subname;
             int nArgs = 0; // number of arguments pushed to stack before calling the method
-            // tokenizer.Advance();
+                           // tokenizer.Advance();
+            ProcessSubroutineCall(subName, nArgs);
+        }
+
+        private void ProcessSubroutineCall(string subName, int nArgs)
+        {
             if (tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals("."))
             {
                 // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
                 tokenizer.Advance();
                 // writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier());
+
+                // set method name for call
+                // check the meethod is instance method or function 
+                var type = symbolTable.TypeOf(subName);
+                var method = tokenizer.Identifier();
+
+                if (!String.IsNullOrEmpty(type))
+                {
+                    subName = type + "." + method;
+                    nArgs++;
+                }
+                else
+                {
+                    subName = subName + "." + method;
+                }
+
                 tokenizer.Advance();
+            }
+            else
+            {
+                subName = classname + subName;
             }
 
             // (
-            //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+            // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
 
             tokenizer.Advance();
             // writer.AddStartElement("expressionList");
-            if (!tokenizer.Symbol().Equals(')')) // if next token is not closing bracket
+            if (!tokenizer.Symbol().Equals(')'))
             {
 
-                // WriteExpression();
                 WriteExpression();
+                nArgs++; // increment arg count for each expression in the expression list
                 while (tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals(","))
                 {
-                    //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+                    // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
 
                     tokenizer.Advance();
                     WriteExpression();
+
+                    nArgs++;
                 }
 
             }
             else
             {
-                //writer.WriteRaw(Environment.NewLine);
+                // writer.WriteRaw(Environment.NewLine);
             }
             //writer.CloseElement();
 
             //)
             //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
-        }
 
+            // call method
+
+            vmWriter.WriteCall(subName, nArgs);
+        }
         private void ArrayEntryExpression()
         {
             //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
@@ -953,7 +962,12 @@ namespace JackCompilerFinal
             {
                 WriteExpression();
             }
+            else if(isVoid)
+            {
+                vmWriter.WritePush(Segment.CONST, 0); // to set void return type
+            }
 
+            vmWriter.WriteReturn();
             // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
             // writer.CloseElement();
         }
