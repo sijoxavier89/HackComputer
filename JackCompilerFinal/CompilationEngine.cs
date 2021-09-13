@@ -655,9 +655,7 @@ namespace JackCompilerFinal
         {
             
             // do
-            // writer.AddElement(KEYWORD.ToLower(), tokenizer.KeyWord().ToLower());
-
-          
+            
             SubroutineCall();
 
             // ;
@@ -665,9 +663,7 @@ namespace JackCompilerFinal
 
             // dump void value
             vmWriter.WritePop(Segment.TEMP, 0);
-            //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
-
-            // writer.CloseElement();
+           
         }
         /// <summary>
         /// for do Subroutine();
@@ -685,14 +681,13 @@ namespace JackCompilerFinal
 
         private void WriteExpression()
         {
-            // writer.AddStartElement("expression");
-
+            // Expression
             CompileTerm();
             // recursive call
 
             while (IsOperationSymbol())
             {
-                //writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
+                // tokenizer.Symbol().ToString().ToLower();
                 var op = tokenizer.Symbol();
                 tokenizer.Advance();
                 CompileTerm();
@@ -705,11 +700,6 @@ namespace JackCompilerFinal
                 else
                 vmWriter.WriteArithmetic(operation[op]);
             }
-
-            //  writer.CloseElement();
-            //  writer.CloseElement();
-
-            // tokenizer.Advance();
 
             return;
 
@@ -731,7 +721,7 @@ namespace JackCompilerFinal
                    // SubroutineCall();
 
                     tokenizer.Advance();
-                    //  writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString());
+                    // tokenizer.Symbol().ToString();
                 }
                 else if (IsArrayEntry())
                 {
@@ -929,10 +919,7 @@ namespace JackCompilerFinal
                 }
 
             }
-            else
-            {
-                // writer.WriteRaw(Environment.NewLine);
-            }
+            
             //writer.CloseElement();
 
             //)
