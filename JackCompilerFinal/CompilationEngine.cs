@@ -23,6 +23,8 @@ namespace JackCompilerFinal
         private int labelWhileCount;
 
         private bool isVoid = false;
+        private bool isConstructor = false;
+        private bool isMethod = false;
         private static Dictionary<string, Kind> kindLookup = new Dictionary<string, Kind>()
         {
             {"static",Kind.STATIC },
@@ -183,6 +185,8 @@ namespace JackCompilerFinal
                 return;
             }
 
+            isConstructor = string.Equals(token, "constructor");
+            isMethod = string.Equals(token, "method");
             // writer.AddStartElement("subroutineDec");
             // writer.AddElement(KEYWORD.ToLower(), tokenizer.KeyWord().ToLower());
 
@@ -221,7 +225,7 @@ namespace JackCompilerFinal
 
             // define new subroutine scope
             symbolTable.StartSubroutine();
-            if(!string.Equals(token, "function"))  // function does not need this as it is static 
+            if(string.Equals(token, "method"))  // function/ constructor does not need this as it is static 
             AddToSymbolTable("this", classname, Kind.ARG);
 
             // Params
@@ -233,12 +237,7 @@ namespace JackCompilerFinal
                 CompileParameterList();
 
             }
-            else
-            {
-                //writer.WriteRaw(Environment.NewLine);
-            }
-            //  writer.CloseElement();
-
+          
             // )
             //tokenizer.Advance();
             if (tokenizer.TokenType().Equals(SYMBOL))
@@ -302,6 +301,7 @@ namespace JackCompilerFinal
             //  writer.AddStartElement("subroutineBody");
             //   writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
 
+           
             tokenizer.Advance();
             string token = tokenizer.KeyWord().ToLower();
             if (token.Equals("var"))
@@ -313,19 +313,33 @@ namespace JackCompilerFinal
 
             // write function : function name nArgs
             // function name -> className.functioname
+
             var nArgs = symbolTable.VarCount(Kind.VAR);
             var functionName = classname + "." + currentSubroutine;
             vmWriter.WriteFunction(functionName, nArgs);
 
+            // if constructor , allocate memory and set the address
+            if (isConstructor)
+            {
+                var numField = symbolTable.VarCount(Kind.FIELD);
+                vmWriter.WritePush(Segment.CONST, numField);
+                vmWriter.WriteCall("Memory.alloc", 1);
+                vmWriter.WritePop(Segment.POINTER, 0);
+            }
+
+            // generate code for method , THIS memory segement
+            // on which the method was called to operate
+            if (isMethod)
+            {
+                vmWriter.WritePush(Segment.ARG, 0);
+                vmWriter.WritePop(Segment.POINTER, 0);  // THIS = argument 0
+            }
             //  writer.AddStartElement("statements");
             if (IsStatement())
             {
                 CompileStatements();
             }
-            else
-            {
-                //  writer.WriteRaw(Environment.NewLine);
-            }
+           
             // writer.CloseElement();
 
             // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
@@ -639,7 +653,7 @@ namespace JackCompilerFinal
 
         public void CompileDo()
         {
-            // writer.AddStartElement("doStatement");
+            
             // do
             // writer.AddElement(KEYWORD.ToLower(), tokenizer.KeyWord().ToLower());
 
@@ -857,6 +871,7 @@ namespace JackCompilerFinal
 
         private void ProcessSubroutineCall(string subName, int nArgs)
         {
+            var routineName = string.Empty;
             if (tokenizer.TokenType().Equals(SYMBOL) && tokenizer.Symbol().ToString().Equals("."))
             {
                 // writer.AddElement(SYMBOL.ToLower(), tokenizer.Symbol().ToString().ToLower());
@@ -870,19 +885,28 @@ namespace JackCompilerFinal
 
                 if (!String.IsNullOrEmpty(type))
                 {
-                    subName = type + "." + method;
+                    routineName = type + "." + method;
                     nArgs++;
+
+                    // push object address as 0th argument
+                    var kind = symbolTable.KindOf(subName);
+                    var index = symbolTable.IndexOf(subName);
+                    vmWriter.WritePush(kindToSegment[kind], index);
                 }
-                else
+                else // static subrotine which does not need object
                 {
-                    subName = subName + "." + method;
+                 
+                    routineName = subName + "." + method;
                 }
 
                 tokenizer.Advance();
             }
             else
             {
-                subName = classname + subName;
+                // when method is inside the same class eg: do draw()
+                vmWriter.WritePush(Segment.POINTER, 0);
+                routineName = classname+ "." + subName;
+                nArgs++;
             }
 
             // (
@@ -917,7 +941,7 @@ namespace JackCompilerFinal
 
             // call method
 
-            vmWriter.WriteCall(subName, nArgs);
+            vmWriter.WriteCall(routineName, nArgs);
         }
         private void ArrayEntryExpression()
         {
