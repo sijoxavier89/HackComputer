@@ -657,8 +657,7 @@ namespace JackCompilerFinal
             // do
             // writer.AddElement(KEYWORD.ToLower(), tokenizer.KeyWord().ToLower());
 
-           // tokenizer.Advance();                                             // moved from method
-                                                                             // writer.AddElement(IDENTIFIER.ToLower(), tokenizer.Identifier()); // moved from method
+          
             SubroutineCall();
 
             // ;

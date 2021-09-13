@@ -69,11 +69,19 @@ namespace JackCompilerFinal
 
                 }
 
-
+                string[] parts;
                 foreach (var word in splitByBlank)
                 {
+                    // if the word is string constant, do not split it
+                    if (word.StartsWith('\"') && word.EndsWith('\"'))
+                    {
+                        parts = new string[] { word };
+                    }
+                    else
+                    {
+                        parts = Regex.Split(word, @"([{}()[\].,;+\-*/&|<>=~])");
+                    }
 
-                    string[] parts = Regex.Split(word, @"([{}()[\].,;+\-*/&|<>=~])");
                     foreach (var part in parts)
                     {
                         if (!string.IsNullOrEmpty(part))
