@@ -6,13 +6,7 @@ namespace JackCompiler
 {
     public class JackAnalyzer
     {
-        private static Dictionary<string, string> xmltoken = new Dictionary<string, string>()
-        {
-            { "&", "&amp;" },
-            { "<", "&lt;" },
-            { ">", "&gt;" }
-
-        };
+       
         static void Main(string[] args)
         {
             Console.WriteLine("Tokenizer started");
@@ -32,17 +26,12 @@ namespace JackCompiler
 
                 
                 filepath = file;
-                streamReader = new StreamReader(filepath);              
-                tokenizer = new JackTokenizer(streamReader);
-
-                // compiler
+               // compiler
                 streamInput = new StreamReader(filepath);
                 string outputFIle = file.Split('.')[0] + ".xml";
-              //  compiler = new CompilationEngine(streamInput, outputFIle);
-               // compiler.CompileClass();
-                // process file line by line
-                string outputTokenFIle = outFile + "T.xml";
-                WriteXML(outputTokenFIle, tokenizer);
+                compiler = new CompilationEngine(streamInput, outputFIle);
+                compiler.CompileClass();
+                
             }
             else // directory
             {
@@ -64,11 +53,7 @@ namespace JackCompiler
 
                     // Token -- will be removed
                     string outputTokenFIle = fileItem.Split('.')[0] + "T.xml";
-                    // process file line by line
 
-                    streamReader = new StreamReader(item);
-                    tokenizer = new JackTokenizer(streamReader);
-                    WriteXML(outputTokenFIle, tokenizer);
                 }
 
             }
@@ -141,15 +126,6 @@ namespace JackCompiler
            
 
         }
-        private static string ModifyTokenValue(string tokenValue, bool isStringConst = false)
-        {
-           
-            if (!isStringConst && xmltoken.ContainsKey(tokenValue))
-            {
-                return xmltoken[tokenValue];
-            }
-
-            return tokenValue.Replace("\"", "&quote;");
-        }
+       
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Xml;
 
 namespace JackCompiler
 {
@@ -6,7 +7,7 @@ namespace JackCompiler
     public class JackXmlWriter
     {
         System.Xml.XmlWriter writer;
-       
+ 
         public JackXmlWriter(string outputFile)
         {
             System.Xml.XmlWriterSettings settings = new System.Xml.XmlWriterSettings()
@@ -14,11 +15,14 @@ namespace JackCompiler
                 Indent = true,
                 IndentChars = "    ",
                 OmitXmlDeclaration = true,
-                Encoding = System.Text.Encoding.UTF32,
-                ConformanceLevel = System.Xml.ConformanceLevel.Auto
+                Encoding = new UTF8Encoding(false),
+                ConformanceLevel = System.Xml.ConformanceLevel.Auto,
+              
             };
 
+         
             writer = System.Xml.XmlTextWriter.Create(outputFile, settings);
+           
             writer.WriteStartDocument();
         }
 
@@ -50,9 +54,13 @@ namespace JackCompiler
         }
         public void Close()
         {
+ 
+            //doc.Save(writer);
             writer.Flush();
             writer.Close();
             writer.Dispose();
         }
+
+       
     }
 }
