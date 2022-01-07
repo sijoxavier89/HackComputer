@@ -1,0 +1,451 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Screen.jack
+
+/**
+ * A library of functions for displaying graphics on the screen.
+ * The Hack physical screen consists of 256 rows (indexed 0..255, top to bottom)
+ * of 512 pixels each (indexed 0..511, left to right). The top left pixel on 
+ * the screen is indexed (0,0).
+ */
+class Screen {
+   
+    static boolean color;
+    static Array twoToThe, blackToThe;
+    static int range, screen;
+    /** Initializes the Screen. */
+    function void init() {
+
+     let twoToThe = Array.new(16);
+     let twoToThe[0] = 1;
+     let twoToThe[1] = 2;
+     let twoToThe[2] = 4;
+     let twoToThe[3] = 8;
+     let twoToThe[4] = 16;
+     let twoToThe[5] = 32;
+     let twoToThe[6] = 64;
+     let twoToThe[7] = 128;
+     let twoToThe[8] = 256;
+     let twoToThe[9] = 512;
+     let twoToThe[10] = 1024;
+     let twoToThe[11] = 2048;
+     let twoToThe[12] = 4096;
+     let twoToThe[13] =  8192;
+     let twoToThe[14] =  16384;
+     let twoToThe[15] = -1;
+
+     let  blackToThe = Array.new(16);	
+     let blackToThe[1] = 1;         // 0000 0000 0000 0001
+     let blackToThe[2] = 3;         // 0000 0000 0000 0011 
+     let blackToThe[3] = 7;         // 0000 0000 0000 0111
+     let blackToThe[4] = 15;        // 0000 0000 0000 1111
+     let blackToThe[5] = 31;
+     let blackToThe[6] = 63;
+     let blackToThe[7] = 127;
+     let blackToThe[8] = 255;
+     let blackToThe[9] = 511;
+     let blackToThe[10] = 1023;
+     let blackToThe[11] = 2047;
+     let blackToThe[12] = 4095;
+     let blackToThe[13] = 8191;
+     let blackToThe[14] = 16383;   
+     let blackToThe[15] = 32767;       // 0111 1111 1111 1111
+
+     let range = 8160;
+     let screen = 16384;
+     let color = true;
+
+     return;
+    }
+
+    /** Erases the entire screen. */
+    function void clearScreen() {
+     var int addr;
+     
+     let addr = 0;   
+     while(addr < range)
+     {
+        let screen[addr] = 0;
+        let addr = addr + 1;
+     }
+     
+      return;
+    }
+
+    /** Sets the current color, to be used for all subsequent drawXXX commands.
+     *  Black is represented by true, white by false. */
+    function void setColor(boolean b) {
+     
+      let color = b;
+      return;
+    }
+
+    /** Draws the (x,y) pixel, using the current color. */
+    function void drawPixel(int x, int y) {
+     
+      var int address, value, dividBy16;
+      
+      let dividBy16 = Math.divide(x,16);
+      let address = Math.multiply(32, y) + dividBy16; // ram address
+      
+      do Screen.SetColorBits(address, x, dividBy16);
+      
+      return;
+    }
+
+   
+    // set color bits at the address for x cordinate 
+    function void SetColorBits(int address, int column, int row)
+    {
+       var int value, currentColor, xmodulo16;
+
+       let value = Memory.peek(screen + address); // value in the current address
+      
+      // set the (x % 16)th bit of value to the current color
+      // modulo x % 16
+      let xmodulo16 = column - Math.multiply(row, 16);      
+      if(color) // black
+      {
+        if(xmodulo16 = 15)
+        {
+          let currentColor = -1 - blackToThe[15];
+          let value = value | currentColor;
+        }
+        else
+        {
+         let currentColor = twoToThe[xmodulo16];
+         let value = value | currentColor;
+        }
+      }
+      else    // white
+      {
+        if(xmodulo16 = 15)
+        {
+          let currentColor = blackToThe[15];
+          let value = value | currentColor;
+        }
+        else
+        {
+         let currentColor = -1 - twoToThe[xmodulo16];
+         let value = value & currentColor ;
+        }
+      } 
+      
+      do Memory.poke(screen + address, value);
+      return;
+    }
+   
+  
+    /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
+    function void drawLine(int x1, int y1, int x2, int y2) {
+      var int a, b, diff, dx, dy, inc, temp;
+
+      let a = 0;
+      let b = 0;
+      let diff = 0;
+      let dx = Math.abs(x2 - x1);
+      let dy = Math.abs(y2 - y1);
+      
+      // draw parallel or perpendicular
+      if((dy = 0) | (dx = 0))
+      {
+       if(dy = 0)
+       {
+        do Screen.drawParallelLine(y1, x1, x2);
+       }
+       else
+       {
+         do Screen.drawPerpendicularLine(x1, y1, y2);
+       }
+      }
+      else
+      {
+        // set cordinates on increasing order of y
+        // keep y1 < y2 always 
+        // swap (x1,y1) and (x2,y2)         
+        if(y1 > y2)
+        {
+          let temp = y1;
+          let y1 = y2;
+          let y2 = temp;
+           
+          // swap corresponding x
+          let temp = x1;
+          let x1 = x2;
+          let x2 = temp;
+        }
+        
+        let inc = 1;
+        if(x1 > x2)
+        {
+          let inc = -1;
+        }
+        // process
+        while((a < (dx + 1)) & (b < (dy+1)))
+        {
+         if(inc = 1)
+         {
+           do Screen.drawPixel(x1+a, y1+b);
+         }
+         else
+         {
+            do Screen.drawPixel(x1 - a, y1+b);
+         }
+         // decide to go right or up
+         if(diff < 0)
+         { 
+          let a = a+1;
+          let diff = diff + dy; 
+         }
+         else
+         {
+          let b = b+1;
+          let diff = diff - dx;
+         }
+        }
+      }
+      return;
+    }
+    
+    // draw parallel line
+    function void drawParallelLine(int y, int x1, int x2)
+    {
+      var int address, addressStart, addressEnd, value, dividx1By16, dividx2By16, x1modulo16, x2modulo16, currentColor, start, end, temp, initAddr;      
+      
+      // swap if the cordinates are not supplied in correct order
+       if(x1 > x2) 
+       {
+         let temp = x1;
+         let x1 = x2;
+         let x2 = temp;
+       } 
+    
+      // set starting address
+      let dividx1By16 = Math.divide(x1,16);
+      let addressStart = Math.multiply(32, y) + dividx1By16; // ram address
+      let start = addressStart; 
+      let x1modulo16 = x1 - Math.multiply(dividx1By16, 16);
+
+      // set end bits
+      let dividx2By16 = Math.divide(x2,16);     
+      let addressEnd = Math.multiply(32, y) + dividx2By16; // ram address
+      let end = addressEnd;
+      let x2modulo16 = x2 - Math.multiply(dividx2By16, 16);
+      
+       
+       if(addressEnd = addressStart)
+       {
+         do Screen.SetBitRange(addressEnd, x1modulo16, x2modulo16);
+         return;
+       } 
+      
+      // check if start from bit other than 0
+       
+       if(x1modulo16 > 0)
+       {
+         do Screen.SetStartBitOfPLine(addressStart, x1modulo16);
+         let start = start + 1;
+       }
+     
+    
+      
+      if(x2modulo16 < 15)
+      {
+         do Screen.SetEndBitOfPLine(addressEnd, x2modulo16);
+         let end = end - 1;
+       }
+     
+        //set the current color bits all the address
+         if(color)
+         {
+           let currentColor = -1;
+         }
+         else 
+         {
+            let currentColor = 0; 
+         }
+         
+        
+
+        while((end - start) > -1)
+        {         
+         let screen[start] = currentColor;
+         let start = start + 1;
+        }
+      
+       return; 
+     }
+     
+     // set the bits when start and end is in the 
+     // same address eg 1 -> 14 to black => x111 1111 1111 111x
+     function void SetBitRange(int address, int start, int end)
+     {
+      var int currentColor, value, startColor, endColor;
+       
+        if(start = 0)
+         {
+           let startColor = 0;
+         }
+         else
+         {
+           let startColor = blackToThe[start];
+         }
+         
+         if(end = 15)
+         {
+           let endColor = -1;
+         }
+         else
+         {
+            let endColor = blackToThe[end + 1];
+         }
+ 
+       if(color)
+       {        
+         let value = Memory.peek(screen + address);
+         let currentColor = endColor - startColor;
+         let value = value | currentColor;
+       }
+       else
+       {       
+         let value = Memory.peek(screen + address);
+         let currentColor = (-1 - endColor) + startColor;
+         let value = value & currentColor;
+       }
+       
+        do Memory.poke(screen + address, value);
+        return;
+     }
+    
+     // Draw perpendicular line
+     // y1 < y2
+     function void drawPerpendicularLine(int x, int y1, int y2)
+     {
+       var int dividBy16, address, start, temp;
+        
+         // swap if the cordinates are not supplied in correct order
+        if(y1 > y2) 
+        {
+         let temp = y1;
+         let y1 = y2;
+         let y2 = temp;
+        }
+
+        let dividBy16 = Math.divide(x,16);
+        let address = Math.multiply(32, y1) + dividBy16; // ram address
+        
+        let start = y1; 
+        while((y2 - start) > -1)
+        {                       
+         do Screen.SetColorBits(address, x, dividBy16);
+         let address =  address + 32;
+         let start = start + 1;
+        }
+      
+       return; 
+    }
+
+
+
+    // set Starting bits of the line when drawing parallel line
+    // if bit index is 1, and color is White, set address to 0000 0000 0000 000x
+    // where x is the existing value of 0th bit, set 1 - 15 to 0
+    function void SetStartBitOfPLine(int address, int bitindex)
+    {
+      var int value, currentColor; 
+
+      let value = Memory.peek(screen + address); // value in the current address
+      if(color) // black
+      {
+        let currentColor = -1 - blackToThe[bitindex];
+        let value = value | currentColor;
+      }
+      else    // white
+      {
+        // when bitindex is 1; set 0th bit to value
+        // 0000 0000 0000 0001 
+        let currentColor = blackToThe[bitindex];
+        let value = value & currentColor;
+      } 
+      
+      do Memory.poke(screen + address, value);
+      return;
+    }
+
+    // set Ending  bits of the line drawing parallel line
+    // if bit index is 1, and color is White, set address to xxxx xxxx xxxx xxx0
+    // where x is the existing value of 15th - 1the bit, set 0th bit  to 0
+    function void SetEndBitOfPLine(int address, int bitindex)
+    {
+      var int value, currentColor; 
+      let value = Memory.peek(screen + address); // value in the current address
+      if(color) // black
+      {
+        let currentColor = blackToThe[bitindex + 1];
+        let value = value | currentColor ;
+      }
+      else // white
+      {
+        // when bitindex is 0; set 0th bit to 0
+        //1111 1111 1111 1111 - 0000 0000 0000 0001 => 1111 1111 1111 1110
+        let currentColor = -1 - blackToThe[bitindex + 1]; 
+        let value = value & currentColor ;
+      } 
+      
+      do Memory.poke(screen + address, value);
+      return;
+    }
+
+
+    /** Draws a filled rectangle whose top left corner is (x1, y1)
+     * and bottom right corner is (x2,y2), using the current color. */
+    function void drawRectangle(int x1, int y1, int x2, int y2) {
+       var int start, end;
+      // draw parallel lines 
+      let start = y1; 
+      let end = y2;     
+     while((end - start) > -1)
+     {
+       do Screen.drawParallelLine(start,x1,x2);
+       do Screen.drawParallelLine(end,x1,x2);
+       let start = start + 1;
+       let end = end - 1;
+       
+     } 
+      return;
+    }
+
+    /** Draws a filled circle of radius r<=181 around (x,y), using the current color. */
+    function void drawCircle(int x, int y, int r) {
+      var int delta, dy, x1, x2, y1;
+      
+      // if r > 181 restrict to 181
+      if( r > 181)
+      {
+        let r = 181;
+      }
+
+      let dy = -r ;
+      while(dy < (r + 1))
+      {
+        let delta = Screen.GetDeltaX(r, dy);
+        let x1 = x - delta;
+        let x2 = x + delta;
+        let y1 = y + dy;
+        do Screen.drawLine(x1,y1, x2, y1);  
+        
+        let dy = dy + 1;
+      }
+      return;
+    }
+    
+    // calculate square root of the r^2 - dy^2
+    function int GetDeltaX(int r, int dy)
+    {
+      var int delta;
+      
+      let delta = Math.sqrt(Math.multiply(r,r) - Math.multiply(dy, dy)); 
+      return delta;
+    }
+}

@@ -19,18 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JackCompilerFinal", "..\Jac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JackCompilerFinal.Tests", "..\JackCompilerFinal.Tests\JackCompilerFinal.Tests.csproj", "{19E5625D-CFEF-4071-AD60-3268748D1D4D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OS", "OS", "{971DCB77-0E13-4BA7-96E4-667A22D99D14}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Array.jack = ..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Array.jack
-		..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Keyboard.jack = ..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Keyboard.jack
-		..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Math.jack = ..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Math.jack
-		..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Memory.jack = ..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Memory.jack
-		..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Output.jack = ..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Output.jack
-		..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Screen.jack = ..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Screen.jack
-		..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\String.jack = ..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\String.jack
-		..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Sys.jack = ..\..\..\..\..\OneDrive\Documents\nand2tetris\projects\12\Sys.jack
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
