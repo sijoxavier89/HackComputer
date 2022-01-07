@@ -1,0 +1,148 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+     static array ram;
+     static Array heap;
+     static int freeList,tail, heapBase, heapSize,heap;
+
+    /** Initializes the class. */
+    function void init() {
+     let ram = 0;
+     
+     // initialize heap manage
+      let heap = 2048;
+      let heapBase = 2048;
+      let freeList = heap;
+      let heap[0] = 0; // next
+      let heap[1] = 14334; //length
+      
+      // end of freeList
+      let tail = freeList;
+     
+      return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+     var int value;
+     let value = ram[address];
+     return value;
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+      let ram[address] = value;
+      return;
+    }
+
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. */
+    function int alloc(int size) {
+      var boolean found,endoflist;
+      var int segment, blockSize, block, prevList,nextList, allocAddress, requiredSize;
+      
+      let prevList = 0;
+      let nextList = 0;
+      let found = false;
+      let endoflist = false;
+      let segment = freeList - heap;
+      let requiredSize = size + 1;
+
+      // first fit approach
+      while((~found)&(~(endoflist)))
+      {
+        
+         let blockSize = heap[segment+1];
+         if(blockSize > requiredSize)
+         {
+           let found = true;
+           let block = segment; // ram address of the available block
+         }
+         else
+         {
+           let prevList = segment;
+           //if this is the last node in the freeList
+           if(heap[segment]= 0)
+           {
+            let endoflist = true;
+           }
+           else  // go to next node in freeList
+           {
+            let segment = heap[segment];
+           }
+         }
+                        
+      }
+      
+       // address of the new object
+       let allocAddress = block + blockSize + 2 - size;
+       
+     
+       let nextList = heap[segment]; // next of found list
+
+       // set next, size of the new allocated block
+       let heap[allocAddress-2] = 0;
+       let heap[allocAddress-1] = size;
+       
+       // re-arrange freeList
+       // if the blockSize equal to required size (size+2)
+       if(blockSize = (size+2)) // if node fully occupied
+       {
+         if(~(prevList = freeList)) 
+           {
+             let heap[prevList] = nextList;
+             
+           }
+           else // first node is occupied
+           {
+             let freeList = nextList + heap;
+           }
+          
+           // if the node is last node, set the tail
+            if(nextList = 0)
+            {
+             let tail = prevList + heap; 
+            }
+       }
+       else //update the size of the found node
+       {
+         
+           let heap[block+1] = blockSize - size - 2; 
+          
+      } 
+         
+      // reset variables
+       let found = false;
+       let endoflist = false;     
+
+      return allocAddress + heap; // actual ram address
+    }
+
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+       var int segmentAddr;
+       let segmentAddr = o - 2;
+       
+       // if heap is fully occupied - freeList = 0;
+       // deallocated space will be new freeList
+        if(freeList = 0)
+        {
+           let freeList = segmentAddr; 
+           let tail = freeList;
+        }
+       
+        // append to the tail of the freeList node
+        // let tail = segmentAddr;
+        let heap[tail - heap] = segmentAddr - heap;
+       return;
+    }    
+}
